@@ -1,19 +1,23 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 using System.Linq;
 using System;
 using System.Collections.Generic;
+using UnityEditor.Callbacks;
 
 /**
  *  Editor script to automate Unity build for Continuous Integrations  
- *  https://github.com/Kaabab/UnityBatchmodeBuilder/
- *  Author : kaabab@gmail.com 
+ *  
+ *  Do not include -quit, batchmodebuilder will exit the application after the build process is complete
+ *  Usage :%unity_install% -projectPath "%project_path%" -executeMethod AutoBuilder.PerformWin64Build -batchmode -logfile /dev/stdout | tee %unity_log%
+ *
  **/
 [InitializeOnLoad]
 public static class BatchmodeBuilder
 {
     // Unitys command line arguments
     public const string FLAG_BATCH_MODE = "-batchmode";
+    public const string FLAG_BATCH_MODE_BUILDER = "-batchmodebuilder";
     // extensions
     public const string FLAG_DEV_BUILD = "-development"; // EditorUserBuildSettings.development when passed in set to true
     public const string FLAG_DEBUG_BUILD = "-debug"; //  EditorUserBuildSettings.allowDebugging when passed in set to true
@@ -45,7 +49,18 @@ public static class BatchmodeBuilder
 
     static BatchmodeBuilder()
     {
-        if (!Init())
+        EditorApplication.update += Init; /* This serves as callback to init after Unity has fully loaded */
+    }
+
+    private static void Init()
+    {
+        EditorApplication.update -= Init;
+        Build();
+    }
+
+    private static void Build()
+    {
+        if (!InitArgs() || BuildPipeline.isBuildingPlayer)
         {
             return;
         }
@@ -57,6 +72,17 @@ public static class BatchmodeBuilder
             return;
         }
         Build(configuration);
+    }
+
+    private static bool InitArgs()
+    {
+        args = System.Environment.GetCommandLineArgs().ToList();
+        if (!GetFlag(FLAG_BATCH_MODE, false) || !GetFlag(FLAG_BATCH_MODE_BUILDER, false))
+        {
+            args = null;
+            return false;
+        }
+        return true;
     }
 
     private static void Build(BuildConfiguration configuration)
@@ -71,17 +97,7 @@ public static class BatchmodeBuilder
         EditorUserBuildSettings.development = configuration.development;
         EditorUserBuildSettings.allowDebugging = configuration.allowDebugging;
         BuildPipeline.BuildPlayer(configuration.scenes, configuration.buildPath, configuration.buildTarget, configuration.buildOptions);
-    }
-
-    private static bool Init()
-    {
-        args = System.Environment.GetCommandLineArgs().ToList();
-        if (!GetFlag(FLAG_BATCH_MODE, false))
-        {
-            args = null;
-            return false;
-        }
-        return true;
+        EditorApplication.Exit(0);
     }
 
     private static BuildConfiguration ParseBuildConfiguration()
