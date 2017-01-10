@@ -8,6 +8,7 @@ Add the script to an "Editor" folder before invoking Unity with ``-batchmode``, 
 
 # Arguments 
 #### Required
+* ``-batchmodebuilder`` : Enables the builder
 * ``-buildtarget iOs`` : Set the target platform  
 * ``-buildpath   "Build"`` : Set the resulting build path (relative to the project)   
 
