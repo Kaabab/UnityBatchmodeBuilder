@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using System.Linq;
 using System;
@@ -9,7 +9,7 @@ using UnityEditor.Callbacks;
  *  Editor script to automate Unity build for Continuous Integrations  
  *  
  *  Do not include -quit, batchmodebuilder will exit the application after the build process is complete
- *  Usage :%unity_install% -projectPath "%project_path%" -executeMethod AutoBuilder.PerformWin64Build -batchmode -logfile /dev/stdout | tee %unity_log%
+ *  Usage :%unity_install% -projectPath "%project_path%" -batchmode -logfile  /dev/stdout -buildtarget Android -buildpath "MyTest.apk" -build -development -debug /dev/stdout | tee %unity_log%
  *
  **/
 [InitializeOnLoad]
