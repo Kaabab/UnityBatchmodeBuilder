@@ -9,14 +9,13 @@ using UnityEditor.Callbacks;
  *  Editor script to automate Unity build for Continuous Integrations  
  *  
  *  Do not include -quit, batchmodebuilder will exit the application after the build process is complete
- *  Usage :%unity_install% -projectPath "%project_path%" -batchmode -logfile  /dev/stdout -buildtarget Android -buildpath "MyTest.apk" -build -development -debug /dev/stdout | tee %unity_log%
+ *  Usage :%unity_install% -projectPath "%project_path%" -batchmodebuilder -logfile  %unity_log% -buildtarget Android -buildpath "MyTest.apk" -development -debug | tee %unity_log%
  *
  **/
 [InitializeOnLoad]
 public static class BatchmodeBuilder
 {
     // Unitys command line arguments
-    public const string FLAG_BATCH_MODE = "-batchmode";
     public const string FLAG_BATCH_MODE_BUILDER = "-batchmodebuilder";
     // extensions
     public const string FLAG_DEV_BUILD = "-development"; // EditorUserBuildSettings.development when passed in set to true
@@ -69,7 +68,7 @@ public static class BatchmodeBuilder
         if (configuration == null)
         {
             Debug.LogWarning("BatchmodeBuilder : failed to parse the command line, check your logs and try again");
-            return;
+            EditorApplication.Exit(1);
         }
         Build(configuration);
     }
@@ -77,7 +76,7 @@ public static class BatchmodeBuilder
     private static bool InitArgs()
     {
         args = System.Environment.GetCommandLineArgs().ToList();
-        if (!GetFlag(FLAG_BATCH_MODE, false) || !GetFlag(FLAG_BATCH_MODE_BUILDER, false))
+        if (!GetFlag(FLAG_BATCH_MODE_BUILDER, false))
         {
             args = null;
             return false;
@@ -121,7 +120,7 @@ public static class BatchmodeBuilder
         }
         BuildTarget buildTarget = (BuildTarget)Enum.Parse(typeof(BuildTarget), buildTargetArg);
         bool isDev = GetFlag(FLAG_DEV_BUILD, false);
-        bool isDebug = GetFlag(FLAG_DEV_BUILD, false);
+        bool isDebug = GetFlag(FLAG_DEBUG_BUILD, false);
         String buildOptionsArgs = GetArg(ARG_BUILD_OPTIONS, null);
         BuildOptions buildOptions = BuildOptions.None;
         if (buildOptionsArgs != null)
