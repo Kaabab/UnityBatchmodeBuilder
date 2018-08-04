@@ -6,10 +6,10 @@ using System.Collections.Generic;
 using UnityEditor.Callbacks;
 
 /**
- *  Editor script to automate Unity build for Continuous Integrations  
+ *  Editor script to automate Unity build for Continuous Integration
  *  
  *  Do not include -quit, batchmodebuilder will exit the application after the build process is complete
- *  Usage :%unity_install% -projectPath "%project_path%" -batchmode -logfile  /dev/stdout -buildtarget Android -buildpath "MyTest.apk" -build -development -debug /dev/stdout | tee %unity_log%
+ *  Usage : %unity_path% -projectPath "%project_path%" -batchmode -batchmodebuilder -logfile /dev/stdout -buildtarget %build_target% -buildpath "%build_path%" %isDev% %isDebug% | tee %unity_log%
  *
  **/
 [InitializeOnLoad]
@@ -68,7 +68,8 @@ public static class BatchmodeBuilder
         BuildConfiguration configuration = ParseBuildConfiguration();
         if (configuration == null)
         {
-            Debug.LogWarning("BatchmodeBuilder : failed to parse the command line, check your logs and try again");
+            Debug.LogError("BatchmodeBuilder : failed to parse the command line, check your logs and try again");
+            EditorApplication.Exit(-1);
             return;
         }
         Build(configuration);
@@ -121,7 +122,7 @@ public static class BatchmodeBuilder
         }
         BuildTarget buildTarget = (BuildTarget)Enum.Parse(typeof(BuildTarget), buildTargetArg);
         bool isDev = GetFlag(FLAG_DEV_BUILD, false);
-        bool isDebug = GetFlag(FLAG_DEV_BUILD, false);
+        bool isDebug = GetFlag(FLAG_DEBUG_BUILD, false);
         String buildOptionsArgs = GetArg(ARG_BUILD_OPTIONS, null);
         BuildOptions buildOptions = BuildOptions.None;
         if (buildOptionsArgs != null)
